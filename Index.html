@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KidPower Fuel Up! - Aussie Mate Mega Edition (1800 kcal)</title>
+
+  <!-- Google Fonts: Fredoka & Nunito for kid-friendly readability -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Canvas Confetti library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: radial-gradient(circle at 10% 20%, #FEF9C3 0%, #F0FDF4 40%, #EFF6FF 100%);
+      min-height: 100vh;
+      user-select: none;
+    }
+    .font-fun {
+      font-family: 'Fredoka', cursive, sans-serif;
+    }
+    .bouncy-hover {
+      transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.16s ease;
+    }
+    .bouncy-hover:hover {
+      transform: translateY(-2px) scale(1.015);
+    }
+    .bouncy-hover:active {
+      transform: translateY(2px) scale(0.98);
+    }
+    .battery-pulse {
+      animation: pulseGlow 1.8s infinite ease-in-out;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 16px rgba(16, 185, 129, 0.4); }
+      50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.95); }
+    }
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="text-slate-800 pb-16 antialiased">
+
+  <header class="w-full bg-white/90 backdrop-blur-md border-b-4 border-amber-300 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 to-emerald-500 flex items-center justify-center text-2xl shadow-md transform -rotate-3 hover:rotate-6 transition">
+          🦘
+        </div>
+        <div>
+          <h1 class="text-xl sm:text-2xl md:text-3xl font-fun font-bold text-amber-600 tracking-wide flex items-center gap-1.5 sm:gap-2">
+            KidPower <span class="text-emerald-600">Aussie Fuel Up!</span>
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-500 font-semibold">1,800 Super Fuel Points for school, footy & outdoor fun!</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button id="soundToggleBtn" onclick="toggleSound()" class="p-2 sm:px-3 sm:py-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-700 text-xs sm:text-sm font-bold flex items-center gap-1.5 transition">
+          <span id="soundIcon">🔊</span>
+          <span class="hidden sm:inline">Sound On</span>
+        </button>
+        <button onclick="confirmReset()" class="px-3 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs sm:text-sm font-bold rounded-full transition flex items-center gap-1.5 shadow-sm">
+          <span>🔄</span>
+          <span>New Day</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 mt-6">
+    <section class="bg-white rounded-3xl p-5 sm:p-7 shadow-xl border-4 border-emerald-300 relative overflow-hidden mb-7">
+      <div class="absolute -right-6 -bottom-6 text-9xl opacity-10 pointer-events-none select-none">⚡</div>
+      
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <!-- Energy Tank Stats -->
+        <div class="w-full md:w-5/12 text-center md:text-left">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs sm:text-sm font-bold mb-2">
+            <span>🎯</span> Daily Goal: <strong class="text-emerald-700 font-black">1,800 Fuel Points (kcal)</strong>
+          </div>
+          <div class="flex items-baseline justify-center md:justify-start gap-2">
+            <span id="currentCalsDisplay" class="text-5xl sm:text-6xl font-fun font-black text-slate-800 tracking-tight">0</span>
+            <span class="text-slate-400 font-bold text-lg sm:text-xl">/ 1,800 kcal</span>
+          </div>
+          
+          <p id="fuelStatusText" class="mt-2 text-sm sm:text-base font-semibold text-slate-600">
+            G'day mate! Fill up your tank for school, footy training, and playtime! 🏉
+          </p>
+        </div>
+
+        <!-- Big Visual Battery Meter -->
+        <div class="w-full md:w-7/12">
+          <div class="flex items-center gap-2.5">
+            <div class="flex-1 bg-slate-100 border-4 border-slate-700 rounded-3xl p-1.5 sm:p-2 relative shadow-inner">
+              <div class="h-10 sm:h-12 rounded-2xl transition-all duration-700 ease-out flex items-center justify-end px-3 relative overflow-hidden" 
+                   id="batteryFill" 
+                   style="width: 0%; background: linear-gradient(90deg, #F59E0B 0%, #10B981 100%);">
+                <div class="absolute inset-0 bg-white/20 -skew-x-12 animate-pulse"></div>
+                <span id="percentText" class="relative z-10 text-white font-fun font-bold text-xs sm:text-sm drop-shadow-md">0%</span>
+              </div>
+            </div>
+            <!-- Battery nipple/terminal -->
+            <div class="w-3 sm:w-4 h-6 sm:h-8 bg-slate-700 rounded-r-lg"></div>
+          </div>
+
+          <!-- Milestones markers along the battery with Aussie terms -->
+          <div class="grid grid-cols-4 px-2 mt-2 text-[11px] sm:text-xs font-bold text-slate-500 text-center">
+            <div class="flex flex-col items-center">
+              <span>🥣 Brekkie</span>
+              <span class="text-slate-400">450 kcal</span>
+            </div>
+            <div class="flex flex-col items-center">
+              <span>🥪 Lunch</span>
+              <span class="text-slate-400">900 kcal</span>
+            </div>
+            <div class="flex flex-col items-center">
+              <span>🧃 Arvo Tea</span>
+              <span class="text-slate-400">1350 kcal</span>
+            </div>
+            <div class="flex flex-col items-center text-emerald-600 font-black">
+              <span>🏆 Target</span>
+              <span>1800 kcal</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Super-Power Message Bar -->
+      <div id="superPowerBanner" class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-slate-600">
+        <span class="flex items-center gap-1.5 font-bold text-emerald-700">
+          <span>⚡ Fuel Tip:</span>
+          <span class="text-slate-600 font-normal">Active Aussie 10-year-olds need roughly 1,800 calories to grow tall, play sport, and think fast in math!</span>
+        </span>
+        <span id="remainingHint" class="bg-amber-100 text-amber-900 px-3 py-1 rounded-full font-bold text-xs">
+          Need 1,800 more points today!
+        </span>
+      </div>
+    </section>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-7">
+      
+      <!-- LEFT COLUMN: Food Pantry & Menu (7 cols) -->
+      <div class="lg:col-span-7 flex flex-col gap-5">
+        <div class="bg-white rounded-3xl p-5 sm:p-6 shadow-md border-2 border-slate-100">
+          
+          <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <div>
+              <h2 class="text-xl sm:text-2xl font-fun font-bold text-slate-800 flex items-center gap-2">
+                <span>🥪</span> Aussie Pantry & Tuckshop
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-500">Pick delicious tucker to add to your daily plate!</p>
+            </div>
+            
+            <button onclick="openCustomFoodModal()" class="px-3.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-xl text-xs sm:text-sm flex items-center gap-1.5 transition bouncy-hover border border-emerald-200">
+              <span>✨</span>
+              <span>Create My Own Food</span>
+            </button>
+          </div>
+
+          <!-- Category Filter Tabs -->
+          <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" id="categoryTabs">
+            <button onclick="filterCategory('all')" class="cat-tab px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold bg-amber-400 text-slate-900 shadow-sm transition shrink-0" data-cat="all">
+              🌟 All Items (<span id="count_all">0</span>)
+            </button>
+            <button onclick="filterCategory('breakfast')" class="cat-tab px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0" data-cat="breakfast">
+              🍳 Cooked Breakfast (<span id="count_breakfast">0</span>)
+            </button>
+            <button onclick="filterCategory('lunch')" class="cat-tab px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0" data-cat="lunch">
+              🥪 Lunch & Hot Food (<span id="count_lunch">0</span>)
+            </button>
+            <button onclick="filterCategory('dinner')" class="cat-tab px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0" data-cat="dinner">
+              🍽️ Full Dinners (<span id="count_dinner">0</span>)
+            </button>
+            <button onclick="filterCategory('meats_sides')" class="cat-tab px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0" data-cat="meats_sides">
+              🥩 Meats & Sides (<span id="count_meats_sides">0</span>)
+            </button>
+            <button onclick="filterCategory('snacks_fruits')" class="cat-tab px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0" data-cat="snacks_fruits">
+              🥕 Snacks & Fruits (<span id="count_snacks_fruits">0</span>)
+            </button>
+            <button onclick="filterCategory('bulk_wpi')" class="cat-tab px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0" data-cat="bulk_wpi">
+              🥛 Bulk Nutrients WPI & Drinks (<span id="count_bulk_wpi">0</span>)
+            </button>
+          </div>
+
+          <!-- Search Input -->
+          <div class="relative my-3">
+            <input type="text" id="foodSearchInput" oninput="searchFoods()" placeholder="Search bacon, eggs, spag bol, fish & chips, parma, steak, Bulk Nutrients, mango..." 
+              class="w-full px-4 py-2.5 pl-10 rounded-2xl bg-slate-50 border-2 border-slate-200 text-sm focus:outline-none focus:border-amber-400 transition" />
+            <span class="absolute left-3.5 top-2.5 text-slate-400">🔍</span>
+          </div>
+
+          <div id="foodsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 mt-3 max-h-[620px] overflow-y-auto pr-1">
+            <!-- Dynamic food cards generated via JavaScript -->
+          </div>
+        </div>
+
+        <!-- Kid Health Tips Box -->
+        <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-3xl p-4 sm:p-5 border-2 border-emerald-200 flex items-center gap-4">
+          <div class="text-4xl shrink-0 p-3 bg-white rounded-2xl shadow-sm">💡</div>
+          <div>
+            <h4 class="font-fun font-bold text-emerald-900 text-sm sm:text-base" id="tipTitle">Aussie Power Tip</h4>
+            <p class="text-xs sm:text-sm text-emerald-800 mt-0.5 leading-relaxed" id="tipBody">
+              Bulk Nutrients WPI (Whey Protein Isolate) from Tasmania gives you over 26g of pure protein per scoop to build strong athletic muscles!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Daily Plate & Tracker (5 cols) -->
+      <div class="lg:col-span-5 flex flex-col gap-5">
+        <div class="bg-white rounded-3xl p-5 sm:p-6 shadow-md border-2 border-slate-100 flex flex-col h-full sticky top-24">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div>
+              <h2 class="text-xl sm:text-2xl font-fun font-bold text-slate-800 flex items-center gap-2">
+                <span>🍽️</span> Today's Aussie Plate
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-400"><span id="plateItemCount">0</span> portions selected</p>
+            </div>
+            <span class="text-xs font-black uppercase tracking-wider px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full" id="plateTotalBadge">
+              0 kcal
+            </span>
+          </div>
+
+          <!-- Empty State -->
+          <div id="emptyPlateState" class="py-16 flex flex-col items-center justify-center text-center">
+            <div class="w-24 h-24 rounded-full bg-amber-50 border-4 border-dashed border-amber-200 flex items-center justify-center text-5xl mb-3 animate-bounce">
+              🐨
+            </div>
+            <h3 class="font-fun text-lg font-bold text-slate-700">Your Plate is Empty, Mate!</h3>
+            <p class="text-xs sm:text-sm text-slate-400 max-w-xs mt-1">
+              Select any cooked breakfast, hearty lunch, full dinner, or Bulk Nutrients shake from the left to start charging!
+            </p>
+          </div>
+
+          <!-- Plate Items Container -->
+          <div id="plateItemsList" class="flex flex-col gap-2.5 my-4 max-h-[440px] overflow-y-auto pr-1 hidden">
+            <!-- Dynamic plate cards -->
+          </div>
+
+          <!-- Bottom Summary Card on Plate -->
+          <div id="plateSummaryCard" class="mt-auto pt-4 border-t border-slate-100 hidden">
+            <div class="bg-slate-50 p-3.5 rounded-2xl flex items-center justify-between text-sm">
+              <span class="font-bold text-slate-600">Total Fuel Points</span>
+              <div class="text-right">
+                <span id="plateTotalSummary" class="font-fun font-black text-2xl text-emerald-600">0</span>
+                <span class="text-xs text-slate-400 font-bold"> / 1,800 kcal</span>
+              </div>
+            </div>
+
+            <!-- Protein and Muscle Power Feedback -->
+            <div id="proteinTrackerBadge" class="mt-2.5 px-3.5 py-2 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-between text-xs text-indigo-800 font-bold">
+              <span>💪 Muscle Power Score:</span>
+              <span id="proteinScoreText" class="text-indigo-900 font-black">Growing Strong!</span>
+            </div>
+
+            <button id="cheerBtn" onclick="fireCelebration()" class="w-full mt-3 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-fun font-bold text-base rounded-2xl shadow-lg shadow-emerald-200 transition bouncy-hover hidden flex items-center justify-center gap-2">
+              <span>🎉</span> Strewth! 1,800 Fuel Target Hit! <span>🚀</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Custom Food Modal -->
+  <div id="customFoodModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-4 border-emerald-300 transform transition-all scale-95 opacity-0 duration-200" id="modalBox">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="text-xl font-fun font-bold text-emerald-800 flex items-center gap-2">
+          <span>✨</span> Add Custom Aussie Tucker
+        </h3>
+        <button onclick="closeCustomFoodModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center">
+          ✕
+        </button>
+      </div>
+
+      <div class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Pick an Icon</label>
+          <div class="flex gap-2 flex-wrap" id="emojiSelector">
+            <button type="button" onclick="selectEmoji('🍳')" class="emoji-btn text-2xl p-2 rounded-xl border-2 border-emerald-600 bg-emerald-50">🍳</button>
+            <button type="button" onclick="selectEmoji('🥪')" class="emoji-btn text-2xl p-2 rounded-xl border-2 border-slate-200 hover:border-emerald-500">🥪</button>
+            <button type="button" onclick="selectEmoji('🍽️')" class="emoji-btn text-2xl p-2 rounded-xl border-2 border-slate-200 hover:border-emerald-500">🍽️</button>
+            <button type="button" onclick="selectEmoji('🥩')" class="emoji-btn text-2xl p-2 rounded-xl border-2 border-slate-200 hover:border-emerald-500">🥩</button>
+            <button type="button" onclick="selectEmoji('🥧')" class="emoji-btn text-2xl p-2 rounded-xl border-2 border-slate-200 hover:border-emerald-500">🥧</button>
+            <button type="button" onclick="selectEmoji('🥤')" class="emoji-btn text-2xl p-2 rounded-xl border-2 border-slate-200 hover:border-emerald-500">🥤</button>
+            <button type="button" onclick="selectEmoji('🍎')" class="emoji-btn text-2xl p-2 rounded-xl border-2 border-slate-200 hover:border-emerald-500">🍎</button>
+            <button type="button" onclick="selectEmoji('🍪')" class="emoji-btn text-2xl p-2 rounded-xl border-2 border-slate-200 hover:border-emerald-500">🍪</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Food Name</label>
+          <input type="text" id="customNameInput" placeholder="e.g. Grandma's Apple Pie or Meatloaf" 
+            class="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:outline-none focus:border-emerald-500 text-sm font-semibold" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Category</label>
+          <select id="customCatInput" class="w-full px-3 py-2.5 rounded-xl border-2 border-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500">
+            <option value="breakfast">🍳 Cooked Breakfast</option>
+            <option value="lunch">🥪 Lunch (Sandwiches & Hot Lunch)</option>
+            <option value="dinner">🍽️ Full Dinner Meals</option>
+            <option value="meats_sides">🥩 Meats & Sides</option>
+            <option value="snacks_fruits">🥕 Snacks, Fruits & Veggies</option>
+            <option value="bulk_wpi">🥛 Bulk Nutrients WPI & Drinks</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Portion Description</label>
+          <input type="text" id="customPortionInput" placeholder="e.g. 1 slice with butter" 
+            class="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:outline-none focus:border-emerald-500 text-sm" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Calories (Fuel Points)</label>
+          <input type="number" id="customCalInput" placeholder="e.g. 350" min="1" max="2000" 
+            class="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:outline-none focus:border-emerald-500 text-sm font-bold text-emerald-600" />
+        </div>
+
+        <div class="pt-2 flex gap-3">
+          <button type="button" onclick="closeCustomFoodModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition">
+            Cancel
+          </button>
+          <button type="button" onclick="saveCustomFood()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-fun font-bold rounded-xl text-sm transition shadow-md shadow-emerald-200">
+            Add to Menu! 🦘
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset Day Modal -->
+  <div id="resetConfirmModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border-4 border-rose-200 text-center">
+      <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-600 text-3xl flex items-center justify-center mx-auto mb-3">
+        🔄
+      </div>
+      <h3 class="font-fun text-xl font-bold text-slate-800">Clear Today's Plate?</h3>
+      <p class="text-xs sm:text-sm text-slate-500 mt-2">
+        Ready for another 1,800 fuel point day? This empties your plate for a fresh Aussie adventure!
+      </p>
+      <div class="flex gap-3 mt-6">
+        <button onclick="closeResetModal()" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm">
+          Keep Eating
+        </button>
+        <button onclick="executeResetDay()" class="flex-1 py-2 bg-rose-500 hover:bg-rose-600 text-white font-fun font-bold rounded-xl text-sm shadow-md shadow-rose-200">
+          Yes, Reset!
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let audioContext = null;
+    let soundEnabled = true;
+
+    function playBeep(freq = 440, duration = 0.1, type = 'sine') {
+      if (!soundEnabled) return;
+      try {
+        if (!audioContext) {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+        gain.gain.setValueAtTime(0.12, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.start();
+        osc.stop(audioContext.currentTime + duration);
+      } catch (e) {
+        console.warn('Audio unavailable', e);
+      }
+    }
+
+    function playPop() {
+      playBeep(520, 0.08, 'triangle');
+    }
+
+    function playSuccessChime() {
+      if (!soundEnabled) return;
+      [440, 554, 659, 880].forEach((freq, idx) => {
+        setTimeout(() => playBeep(freq, 0.16, 'sine'), idx * 85);
+      });
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const icon = document.getElementById('soundIcon');
+      const text = document.querySelector('#soundToggleBtn span:last-child');
+      if (soundEnabled) {
+        icon.textContent = '🔊';
+        if (text) text.textContent = 'Sound On';
+        playPop();
+      } else {
+        icon.textContent = '🔇';
+        if (text) text.textContent = 'Muted';
+      }
+    }
+
+    const BREAKFAST_ITEMS = [
+      { id: 'b_bacon_egg_toast', name: 'Bacon, Eggs & Buttered Toast', cat: 'breakfast', calories: 460, emoji: '🥓', portion: '2 rashers crispy bacon, 2 eggs & 1 toast', tag: 'Aussie Brekkie' },
+      { id: 'b_scrambled_sourdough', name: 'Scrambled Eggs on Sourdough', cat: 'breakfast', calories: 380, emoji: '🍳', portion: '2 creamy scrambled eggs on toasted sourdough', tag: 'Café Classic' },
+      { id: 'b_avo_toast_feta', name: 'Smashed Avo on Toast with Feta', cat: 'breakfast', calories: 340, emoji: '🥑', portion: 'Thick sourdough, half avocado & crumbled feta', tag: 'Aussie Icon' },
+      { id: 'b_eggs_benedict', name: 'Eggs Benedict with Ham', cat: 'breakfast', calories: 510, emoji: '🍳', portion: 'Poached eggs, leg ham, hollandaise & muffin', tag: 'Weekend Special' },
+      { id: 'b_big_brekkie', name: 'Full Aussie Big Brekkie', cat: 'breakfast', calories: 640, emoji: '🍳', portion: 'Eggs, bacon, sausage, hash brown & toast', tag: 'Mega Energy' },
+      { id: 'b_pancakes_berries', name: 'Pancakes with Maple & Fresh Berries', cat: 'breakfast', calories: 430, emoji: '🥞', portion: '3 fluffy buttermilk pancakes with strawberries', tag: 'Sweet Energy' },
+      { id: 'b_french_toast', name: 'Golden French Toast with Honey', cat: 'breakfast', calories: 390, emoji: '🍞', portion: '2 thick egg-soaked slices pan-fried golden', tag: 'Kid Fave' },
+      { id: 'b_poached_toast', name: '2 Poached Eggs on Wholemeal Toast', cat: 'breakfast', calories: 280, emoji: '🥚', portion: '2 soft poached eggs with buttered wholemeal', tag: 'Lean Protein' },
+      { id: 'b_cheese_mushroom_omelette', name: 'Cheese & Mushroom Omelette', cat: 'breakfast', calories: 360, emoji: '🍳', portion: '2 egg omelette with button mushrooms & cheddar', tag: 'Cheesy Goodness' },
+      { id: 'b_breakfast_burrito', name: 'Warm Breakfast Burrito', cat: 'breakfast', calories: 480, emoji: '🌯', portion: 'Tortilla rolled with scrambled eggs, beans & bacon', tag: 'Roll & Go' },
+      { id: 'b_bacon_egg_roll', name: 'Bacon & Egg Roll with BBQ Sauce', cat: 'breakfast', calories: 490, emoji: '🥪', portion: 'Toasted milk bun, bacon, fried egg & smoky sauce', tag: 'Footy Morning' },
+      { id: 'b_ham_cheese_croissant', name: 'Toasted Ham & Cheese Croissant', cat: 'breakfast', calories: 410, emoji: '🥐', portion: 'Bakery croissant with leg ham & melted Swiss', tag: 'Bakery Treat' },
+      { id: 'b_baked_beans_toast', name: 'Heinz Baked Beans on Buttered Toast', cat: 'breakfast', calories: 320, emoji: '🥫', portion: 'Rich tomato baked beans over 2 slices toast', tag: 'Fiber Power' },
+      { id: 'b_shakshuka', name: 'Shakshuka Eggs with Toast Soldiers', cat: 'breakfast', calories: 340, emoji: '🍳', portion: 'Eggs poached in rich spiced tomato sauce', tag: 'Flavor Punch' },
+      { id: 'b_spinach_feta_scramble', name: 'Spinach & Feta Scrambled Eggs', cat: 'breakfast', calories: 310, emoji: '🍳', portion: 'Eggs scrambled with baby spinach and Aussie feta', tag: 'Iron Boost' },
+      { id: 'b_savory_mince', name: 'Savory Beef Mince on Thick Toast', cat: 'breakfast', calories: 420, emoji: '🥩', portion: 'Hearty simmered beef mince with peas & toast', tag: 'Country Style' },
+      { id: 'b_waffles_icecream', name: 'Belgian Waffle with Vanilla Ice Cream', cat: 'breakfast', calories: 450, emoji: '🧇', portion: 'Crisp warm waffle, 1 scoop ice cream & syrup', tag: 'Weekend Treat' },
+      { id: 'b_sausage_egg_muffin', name: 'Sausage, Egg & Cheese Muffin', cat: 'breakfast', calories: 440, emoji: '🍔', portion: 'Toasted English muffin, pork sausage & fried egg', tag: 'Drive-Thru Style' },
+      { id: 'b_corn_fritters', name: 'Corn & Zucchini Fritters with Relish', cat: 'breakfast', calories: 350, emoji: '🌽', portion: '3 pan-fried golden sweetcorn patties', tag: 'Veggie Power' },
+      { id: 'b_breakfast_quesadilla', name: 'Toasted Breakfast Quesadilla', cat: 'breakfast', calories: 410, emoji: '🧀', portion: 'Folded tortilla with melted cheese, ham & eggs', tag: 'Crispy Melt' },
+      { id: 'b_salmon_bagel', name: 'Smoked Salmon & Cream Cheese Bagel', cat: 'breakfast', calories: 390, emoji: '🥯', portion: 'Toasted bagel with Tasmanian salmon & spread', tag: 'Omega-3 Power' },
+      { id: 'b_hashbrowns_eggs', name: '2 Crispy Hash Browns & 2 Fried Eggs', cat: 'breakfast', calories: 370, emoji: '🥔', portion: 'Golden crunchy hash browns with sunny eggs', tag: 'Crispy Crunch' },
+      { id: 'b_dippy_eggs_soldiers', name: 'Soft Boiled Dippy Eggs with Soldiers', cat: 'breakfast', calories: 260, emoji: '🥚', portion: '2 soft-boiled eggs with buttered toast fingers', tag: 'Dippy Fun' },
+      { id: 'b_chorizo_hash', name: 'Chorizo & Crispy Potato Hash', cat: 'breakfast', calories: 470, emoji: '🥔', portion: 'Pan-fried potato cubes with sliced spiced sausage', tag: 'Savory Warmth' },
+      { id: 'b_porridge_honey_banana', name: 'Warm Rolled Oats Porridge with Banana', cat: 'breakfast', calories: 320, emoji: '🥣', portion: 'Creamy milk oats topped with sliced banana & honey', tag: 'Slow Burn Fuel' },
+      { id: 'b_chive_cheddar_scramble', name: 'Chive & Cheddar Scrambled Eggs', cat: 'breakfast', calories: 340, emoji: '🍳', portion: 'Fluffy eggs whisked with sharp cheese & chives', tag: 'Rich & Creamy' },
+      { id: 'b_veggie_big_brekkie', name: 'Veggie Big Brekkie Plate', cat: 'breakfast', calories: 450, emoji: '🍅', portion: 'Grilled halloumi, mushrooms, tomato, eggs & toast', tag: 'Plant Power' },
+      { id: 'b_halloumi_tomato_toast', name: 'Grilled Halloumi & Roast Tomato Toast', cat: 'breakfast', calories: 360, emoji: '🧀', portion: 'Golden salty halloumi with blistered cherry tomatoes', tag: 'Mediterranean' },
+      { id: 'b_ricotta_hotcakes', name: 'Fluffy Ricotta Hotcakes with Honeycomb', cat: 'breakfast', calories: 490, emoji: '🥞', portion: '2 thick soufflé hotcakes with honey butter', tag: 'Sydney Café Style' },
+      { id: 'b_breakfast_sausage_skillet', name: 'Country Sausage & Pepper Skillet', cat: 'breakfast', calories: 430, emoji: '🍳', portion: 'Grilled sliced sausages, peppers, onion & 1 egg', tag: 'Sizzler' },
+      { id: 'b_blt_bagel', name: 'Brekkie BLT Bagel', cat: 'breakfast', calories: 420, emoji: '🥯', portion: 'Toasted seeded bagel with bacon, lettuce & tomato', tag: 'Crunchy Morning' },
+      { id: 'b_mushroom_toast', name: 'Garlic Butter Mushrooms on Sourdough', cat: 'breakfast', calories: 290, emoji: '🍄', portion: 'Sautéed butter mushrooms on thick toast', tag: 'Earthy Fuel' },
+      { id: 'b_blueberry_pancakes', name: 'Blueberry Buttermilk Pancakes', cat: 'breakfast', calories: 420, emoji: '🥞', portion: 'Stack of 3 pancakes packed with sweet blueberries', tag: 'Antioxidant Stack' },
+      { id: 'b_avocado_fried_egg_toast', name: 'Avocado & Sunny Fried Egg Toast', cat: 'breakfast', calories: 360, emoji: '🥑', portion: 'Crushed avocado on toast with runny egg', tag: 'Yolk Dipper' }
+    ];
+
+    const LUNCH_ITEMS = [
+      { id: 'l_chicken_salad_sandwich', name: 'Poached Chicken Salad Sandwich', cat: 'lunch', calories: 360, emoji: '🥪', portion: 'Chicken breast, lettuce, mayo & cucumber on grain', tag: 'Lunchbox Classic' },
+      { id: 'l_ham_cheese_tomato_toastie', name: 'Ham, Cheese & Tomato Toastie', cat: 'lunch', calories: 380, emoji: '🥪', portion: 'Golden buttered toastie with melted cheddar', tag: 'All-Time Aussie' },
+      { id: 'l_bakery_sausage_roll', name: 'Bakery Sausage Roll with Sauce', cat: 'lunch', calories: 410, emoji: '🥟', portion: 'Flaky pastry roll with beef mince & tomato sauce', tag: 'Tuckshop Star' },
+      { id: 'l_aussie_meat_pie_lunch', name: 'Aussie Meat Pie with Tomato Sauce', cat: 'lunch', calories: 450, emoji: '🥧', portion: 'Individual bakery minced beef pie with red sauce', tag: 'Footy Legend' },
+      { id: 'l_chicken_parma_roll', name: 'Chicken Parmigiana Bread Roll', cat: 'lunch', calories: 540, emoji: '🥖', portion: 'Crumbed schnitzel, napoli sauce & cheese in roll', tag: 'Hearty Lunch' },
+      { id: 'l_tuna_melt', name: 'Tuna & Sweetcorn Melt', cat: 'lunch', calories: 390, emoji: '🐟', portion: 'Flaked tuna, sweetcorn and melted cheese on toast', tag: 'Brain Power' },
+      { id: 'l_egg_lettuce_sandwich', name: 'Curried Egg & Crisp Lettuce Sandwich', cat: 'lunch', calories: 320, emoji: '🥪', portion: 'Mashed boiled eggs, mild mayonnaise & cos lettuce', tag: 'School Favorite' },
+      { id: 'l_roast_beef_roll', name: 'Roast Beef & Gravy Roll', cat: 'lunch', calories: 440, emoji: '🥖', portion: 'Warm sliced roast beef with rich gravy in long roll', tag: 'Warm & Savory' },
+      { id: 'l_chicken_caesar_wrap', name: 'Chicken Caesar Salad Wrap', cat: 'lunch', calories: 470, emoji: '🌯', portion: 'Grilled chicken strips, bacon bits, cos & dressing', tag: 'Wrap It Up' },
+      { id: 'l_turkey_cranberry_baguette', name: 'Smoked Turkey & Cranberry Baguette', cat: 'lunch', calories: 420, emoji: '🥖', portion: 'Sliced turkey breast, cranberry sauce & brie cheese', tag: 'Gourmet Crunch' },
+      { id: 'l_leftover_spag_bol_thermos', name: 'Warm Spaghetti Bolognese in Thermos', cat: 'lunch', calories: 460, emoji: '🍝', portion: '1 cup rich beef bolognese with spaghetti', tag: 'Comfort Fuel' },
+      { id: 'l_pulled_pork_slider', name: '2 Pulled Pork Sliders with Slaw', cat: 'lunch', calories: 450, emoji: '🍔', portion: '2 mini brioche buns with BBQ pork & crunchy slaw', tag: 'BBQ Sweet' },
+      { id: 'l_steamed_dim_sims', name: '3 Steamed Aussie Dim Sims with Soy', cat: 'lunch', calories: 330, emoji: '🥟', portion: '3 classic Aussie dimies with soy sauce', tag: 'Fish & Chip Shop' },
+      { id: 'l_mini_sausage_rolls', name: '4 Party Sausage Rolls with Sauce', cat: 'lunch', calories: 380, emoji: '🥟', portion: '4 crispy bite-size beef party sausage rolls', tag: 'Party Snack' },
+      { id: 'l_hot_chip_roll', name: 'Aussie Hot Chip Roll with Butter', cat: 'lunch', calories: 420, emoji: '🥖', portion: 'Crispy hot chips loaded inside a soft buttered roll', tag: 'Carb Energy' },
+      { id: 'l_veggie_burrito_bowl', name: 'Mexican Burrito Bowl with Rice & Beans', cat: 'lunch', calories: 390, emoji: '🥗', portion: 'Brown rice, black beans, salsa, cheese & corn', tag: 'Color Fuel' },
+      { id: 'l_blt_ciabatta', name: 'Crispy Bacon BLT on Ciabatta', cat: 'lunch', calories: 430, emoji: '🥪', portion: 'Smoky bacon, crisp lettuce, tomato & mayo', tag: 'Super Crunch' },
+      { id: 'l_hot_dog_sauce', name: 'Stadium Hot Dog with Mustard & Sauce', cat: 'lunch', calories: 380, emoji: '🌭', portion: 'Frankfurt sausage in soft roll with tomato sauce', tag: 'Match Day' },
+      { id: 'l_meatball_sub', name: 'Cheesy Beef Meatball Sub', cat: 'lunch', calories: 530, emoji: '🥖', portion: 'Tender meatballs in rich marinara with mozzarella', tag: 'Loaded Fuel' },
+      { id: 'l_falafel_wrap', name: 'Falafel & Hummus Pocket Wrap', cat: 'lunch', calories: 390, emoji: '🌯', portion: 'Crunchy chickpea falafels with salad & hummus', tag: 'Fiber Power' },
+      { id: 'l_grilled_cheese_bacon', name: 'Triple Cheese & Bacon Toastie', cat: 'lunch', calories: 480, emoji: '🥪', portion: 'Cheddar, mozzarella and bacon toasted golden', tag: 'Ultimate Melt' },
+      { id: 'l_teriyaki_sushi_rolls', name: '2 Teriyaki Chicken Sushi Hand Rolls', cat: 'lunch', calories: 370, emoji: '🍱', portion: '2 nori seaweed rice rolls with chicken & cucumber', tag: 'Clean Fuel' },
+      { id: 'l_schnitzel_sandwich', name: 'Chicken Schnitzel & Mayo Sandwich', cat: 'lunch', calories: 490, emoji: '🥪', portion: 'Crispy golden crumbed chicken breast with lettuce', tag: 'Crowd Favorite' },
+      { id: 'l_pumpkin_soup_roll', name: 'Roast Pumpkin Soup with Crusty Roll', cat: 'lunch', calories: 310, emoji: '🥣', portion: 'Creamy warm bowl of soup with buttered white roll', tag: 'Winter Warmer' },
+      { id: 'l_pizza_pocket', name: 'Ham & Pineapple Pizza Pocket', cat: 'lunch', calories: 350, emoji: '🍕', portion: 'Warm folded crust packed with pizza sauce & ham', tag: 'Tuckshop Classic' },
+      { id: 'l_fried_rice_cup', name: 'Special Fried Rice with Ham & Egg', cat: 'lunch', calories: 410, emoji: '🍚', portion: 'Wok-tossed rice with peas, carrot, ham & omelette', tag: 'Tasty Grains' },
+      { id: 'l_mac_cheese_cup', name: 'Creamy Macaroni & Cheese Bowl', cat: 'lunch', calories: 430, emoji: '🧀', portion: 'Cheesy pasta bake with golden top', tag: 'Comfort Meal' },
+      { id: 'l_noodle_stir_fry_box', name: 'Hokkien Noodle Stir Fry Box', cat: 'lunch', calories: 420, emoji: '🥡', portion: 'Thick egg noodles with sweet soy chicken & veg', tag: 'Noodle Power' },
+      { id: 'l_beef_nachos_plate', name: 'Mild Beef Nachos with Melted Cheese', cat: 'lunch', calories: 490, emoji: '🧀', portion: 'Corn tortilla chips, seasoned beef mince & salsa', tag: 'Crunchy Fiesta' },
+      { id: 'l_rice_paper_rolls', name: '2 Pork & Prawn Cold Rice Paper Rolls', cat: 'lunch', calories: 240, emoji: '🥢', portion: 'Fresh rolls with vermicelli noodles & sweet chilli', tag: 'Light & Crisp' },
+      { id: 'l_banh_mi_pork', name: 'Vietnamese Pork Banh Mi Roll', cat: 'lunch', calories: 470, emoji: '🥖', portion: 'Crispy baguette, roast pork, pickled carrot & mayo', tag: 'Street Classic' },
+      { id: 'l_cheeseburger_pickles', name: 'Aussie Beef Cheeseburger with Pickles', cat: 'lunch', calories: 490, emoji: '🍔', portion: 'Grilled beef patty, slice of cheddar, tomato sauce', tag: 'Classic Burger' },
+      { id: 'l_vegemite_cheese_scroll', name: 'Bakery Vegemite & Cheese Scroll', cat: 'lunch', calories: 320, emoji: '🥨', portion: 'Fluffy baked yeast scroll with melted cheddar', tag: 'Bakery Run' },
+      { id: 'l_chicken_mayo_wrap', name: 'Chicken, Lettuce & Sweet Chilli Wrap', cat: 'lunch', calories: 410, emoji: '🌯', portion: 'Tender chicken strips with sweet chilli mayo', tag: 'Quick Wrap' }
+    ];
+
+    const DINNER_ITEMS = [
+      { id: 'd_spag_bol', name: 'Classic Aussie Spaghetti Bolognese', cat: 'dinner', calories: 580, emoji: '🍝', portion: 'Large bowl tender spaghetti with rich beef sauce & parmesan', tag: 'Family Favorite' },
+      { id: 'd_pie_mash_peas', name: 'Meat Pie with Mash & Mushy Peas', cat: 'dinner', calories: 620, emoji: '🥧', portion: 'Aussie beef pie topped with mashed potato and peas', tag: 'Pub Classic' },
+      { id: 'd_fish_chips', name: 'Crispy Battered Fish & Hot Chips', cat: 'dinner', calories: 610, emoji: '🐟', portion: 'Golden barramundi fillet with crunchy salted chips', tag: 'Friday Night' },
+      { id: 'd_sunday_roast_lamb', name: 'Sunday Roast Lamb with Roast Potatoes & Gravy', cat: 'dinner', calories: 620, emoji: '🍖', portion: 'Sliced tender lamb leg, roast spuds, peas & gravy', tag: 'Sunday Tradition' },
+      { id: 'd_parma_chips_salad', name: 'Chicken Parmigiana with Chips & Salad', cat: 'dinner', calories: 680, emoji: '🍗', portion: 'Crumbed chicken breast, napoli sauce, melted cheese & chips', tag: 'Pub Legend' },
+      { id: 'd_roast_beef_yorkshire', name: 'Roast Beef with Roast Pumpkin & Gravy', cat: 'dinner', calories: 590, emoji: '🥩', portion: 'Sliced roast beef, caramelized pumpkin & carrots', tag: 'Hearty Feast' },
+      { id: 'd_bbq_pork_ribs_corn', name: 'BBQ Pork Ribs with Sweet Corn on the Cob', cat: 'dinner', calories: 650, emoji: '🍖', portion: 'Sticky glazed ribs with buttered sweet corn', tag: 'Finger Lickin' },
+      { id: 'd_beef_lasagne_garlic_bread', name: 'Beef Lasagne with Slice of Garlic Bread', cat: 'dinner', calories: 630, emoji: '🍝', portion: 'Layered pasta, beef bolognese, béchamel & toast', tag: 'Italian Night' },
+      { id: 'd_steak_mash_veg', name: 'Rump Steak with Creamy Mash & Steamed Veg', cat: 'dinner', calories: 560, emoji: '🥩', portion: 'Grilled beef steak with garlic mash & green beans', tag: 'High Protein' },
+      { id: 'd_butter_chicken_rice', name: 'Mild Butter Chicken with Jasmine Rice', cat: 'dinner', calories: 570, emoji: '🍛', portion: 'Creamy tomato spiced chicken served with fluffy rice', tag: 'Kid Approved' },
+      { id: 'd_beef_tacos_3', name: '3 Crunchy Beef Tacos with Cheese & Salsa', cat: 'dinner', calories: 490, emoji: '🌮', portion: '3 taco shells packed with seasoned mince, lettuce & cheese', tag: 'Taco Tuesday' },
+      { id: 'd_bangers_mash', name: 'Bangers & Mash with Sweet Onion Gravy', cat: 'dinner', calories: 540, emoji: '🌭', portion: '2 thick beef sausages over potato mash with gravy', tag: 'Homestyle' },
+      { id: 'd_shepherds_pie', name: 'Shepherd’s Pie with Golden Potato Top', cat: 'dinner', calories: 510, emoji: '🥧', portion: 'Minced lamb and peas baked under creamy mashed potato', tag: 'Comfort Food' },
+      { id: 'd_beef_broccoli_stirfry', name: 'Beef & Broccoli Stir Fry with Rice', cat: 'dinner', calories: 480, emoji: '🥦', portion: 'Stir-fried beef strips and broccoli florets over rice', tag: 'Iron & Veg' },
+      { id: 'd_chicken_fried_rice', name: 'Chicken & Veggie Fried Rice Supreme', cat: 'dinner', calories: 520, emoji: '🍚', portion: 'Large wok bowl with diced chicken, egg, shallots & rice', tag: 'Easy Dinner' },
+      { id: 'd_sweet_sour_pork', name: 'Sweet & Sour Pork with Steamed Rice', cat: 'dinner', calories: 560, emoji: '🥡', portion: 'Crispy pork bites, pineapple chunks & red peppers', tag: 'Takeaway Fave' },
+      { id: 'd_crispy_barramundi_veg', name: 'Pan-Seared Barramundi with Roast Veggies', cat: 'dinner', calories: 460, emoji: '🐟', portion: 'Aussie sea bass fillet with sweet potato & zucchini', tag: 'Omega Smart' },
+      { id: 'd_chicken_tikka_masala', name: 'Mild Chicken Tikka Masala with Naan', cat: 'dinner', calories: 550, emoji: '🍛', portion: 'Tender chicken curry with mini warm garlic naan', tag: 'Flavor Fuel' },
+      { id: 'd_penne_carbonara', name: 'Penne Carbonara with Bacon & Cream', cat: 'dinner', calories: 620, emoji: '🍝', portion: 'Pasta tossed with crispy bacon, egg and parmesan sauce', tag: 'Creamy Classic' },
+      { id: 'd_homemade_beef_burger', name: 'Homemade Beef Burger with Sweet Potato Fries', cat: 'dinner', calories: 610, emoji: '🍔', portion: 'Beef patty, lettuce, beetroot, tomato & baked fries', tag: 'Burger Night' },
+      { id: 'd_chicken_katsu_curry', name: 'Crispy Chicken Katsu Curry with Rice', cat: 'dinner', calories: 630, emoji: '🍛', portion: 'Panko chicken cutlet with mild Japanese curry sauce', tag: 'Crispy Crunch' },
+      { id: 'd_beef_enchiladas', name: '2 Cheesy Baked Beef Enchiladas', cat: 'dinner', calories: 530, emoji: '🌯', portion: 'Rolled tortillas baked in tomato sauce & cheddar', tag: 'Fiesta Dinner' },
+      { id: 'd_pork_chops_applesauce', name: 'Grilled Pork Chop with Applesauce & Peas', cat: 'dinner', calories: 490, emoji: '🥩', portion: 'Pan-seared chop served with sweet stewed apples', tag: 'Lean Cut' },
+      { id: 'd_lamb_souvlaki_plate', name: 'Lamb Souvlaki Plate with Pita & Salad', cat: 'dinner', calories: 570, emoji: '🥙', portion: 'Grilled marinated lamb skewers, tzatziki & flatbread', tag: 'Greek Aussie' },
+      { id: 'd_beef_casserole_cob', name: 'Slow-Cooked Beef Casserole with Crusty Bread', cat: 'dinner', calories: 520, emoji: '🍲', portion: 'Tender chuck steak stewed with carrots & potatoes', tag: 'Slow Simmer' },
+      { id: 'd_teriyaki_salmon_bowl', name: 'Teriyaki Salmon Rice Bowl with Edamame', cat: 'dinner', calories: 510, emoji: '🍣', portion: 'Glazed salmon fillet over rice with steamed green beans', tag: 'Super Food' },
+      { id: 'd_roast_chicken_maryland', name: 'Crispy Roast Chicken Leg with Roast Potatoes', cat: 'dinner', calories: 550, emoji: '🍗', portion: 'Golden seasoned chicken leg with crunchy roast spuds', tag: 'Family Roast' },
+      { id: 'd_fettuccine_alfredo_chicken', name: 'Chicken Fettuccine Alfredo', cat: 'dinner', calories: 610, emoji: '🍝', portion: 'Ribbon pasta in creamy parmesan sauce with chicken', tag: 'Rich Pasta' },
+      { id: 'd_mongolian_beef_rice', name: 'Sweet Mongolian Beef with Rice', cat: 'dinner', calories: 530, emoji: '🥩', portion: 'Caramelized beef slices with spring onions & rice', tag: 'Savory & Sweet' },
+      { id: 'd_chili_con_carne', name: 'Mild Chili Con Carne with Tortilla Chips', cat: 'dinner', calories: 490, emoji: '🍲', portion: 'Minced beef, red kidney beans & melted cheese', tag: 'Protein Power' },
+      { id: 'd_sausage_sizzle_dinner', name: 'Sausage Sizzle Dinner with Potato Salad', cat: 'dinner', calories: 510, emoji: '🌭', portion: '2 grilled snags, fried onions, bread & potato salad', tag: 'Barbie Night' },
+      { id: 'd_bbq_mixed_grill', name: 'Aussie Mixed Grill (Chop, Sausage & Egg)', cat: 'dinner', calories: 640, emoji: '🥩', portion: 'Lamb chop, thin sausage, bacon rasher & fried egg', tag: 'Meat Lovers' },
+      { id: 'd_beef_stroganoff', name: 'Beef Stroganoff with Ribbon Noodles', cat: 'dinner', calories: 580, emoji: '🍝', portion: 'Beef strips and mushrooms in sour cream sauce', tag: 'Hearty Classic' },
+      { id: 'd_crispy_calamari_chips', name: 'Salt & Pepper Calamari with Chips', cat: 'dinner', calories: 520, emoji: '🦑', portion: 'Tender crumbed calamari rings with lemon & fries', tag: 'Coastal Treat' }
+    ];
+
+    const MEATS_AND_SIDES_ITEMS = [
+      { id: 'm_steak_200g', name: '200g Rump or Sirloin Steak', cat: 'meats_sides', calories: 420, emoji: '🥩', portion: '200g grilled tender Aussie beef steak', tag: 'Iron & Protein' },
+      { id: 'm_chicken_200g', name: '200g Tender Chicken Fillet', cat: 'meats_sides', calories: 330, emoji: '🍗', portion: '200g grilled chicken breast or thigh', tag: 'Lean Muscle' },
+      { id: 'm_lamb_leg_200g', name: '200g Roast Lamb Leg', cat: 'meats_sides', calories: 410, emoji: '🍖', portion: '200g sliced Aussie Sunday roast lamb', tag: 'Rich Protein' },
+      { id: 'm_fish_150g', name: '150g Grilled Fish (Barramundi / Salmon)', cat: 'meats_sides', calories: 190, emoji: '🐟', portion: '150g pan-seared fresh fish fillet', tag: 'Omega-3 Brain' },
+      { id: 'm_pork_ribs_half', name: 'Half Rack of BBQ Pork Ribs', cat: 'meats_sides', calories: 560, emoji: '🍖', portion: 'Half rack tender ribs with smoky glaze', tag: 'Sticky Feast' },
+      { id: 'm_beef_sausages_3', name: '3 Aussie Beef Sausages', cat: 'meats_sides', calories: 430, emoji: '🌭', portion: '3 grilled Aussie beef snags', tag: 'BBQ Staples' },
+      { id: 's_hot_chips', name: 'Hot Chips with Chicken Salt', cat: 'meats_sides', calories: 280, emoji: '🍟', portion: 'Medium scoop of crunchy hot potato chips', tag: 'Aussie Legend' },
+      { id: 's_potatoes_mash', name: 'Mashed or Boiled Potatoes', cat: 'meats_sides', calories: 140, emoji: '🥔', portion: '1 medium potato mashed with butter', tag: 'Comfort Carb' },
+      { id: 's_pasta_cup', name: 'Pasta Bowl (Butter or Olive Oil)', cat: 'meats_sides', calories: 210, emoji: '🍝', portion: '1 cup cooked spiral pasta with olive oil', tag: 'Energy Fuel' },
+      { id: 's_sweet_potato_roast', name: 'Roasted Sweet Potato Chunks', cat: 'meats_sides', calories: 150, emoji: '🍠', portion: '1 medium sweet potato baked golden', tag: 'Beta-Carotene' },
+      { id: 's_bread_butter', name: 'Sliced Aussie Bread with Butter', cat: 'meats_sides', calories: 160, emoji: '🍞', portion: '2 slices soft bread with real butter', tag: 'Everyday Side' },
+      { id: 's_steamed_corn_cob', name: 'Steamed Sweet Corn Cob with Butter', cat: 'meats_sides', calories: 120, emoji: '🌽', portion: '1 juicy whole corn on the cob', tag: 'Sweet & Crisp' }
+    ];
+
+    const SNACKS_FRUITS_VEGGIES_ITEMS = [
+      { id: 'sn_hummus_carrots', name: 'Hummus & Crunchy Carrot Sticks', cat: 'snacks_fruits', calories: 130, emoji: '🥕', portion: 'Carrot sticks with 2 tbsp creamy hummus', tag: 'Crunchy Dipper' },
+      { id: 'sn_cucumber_hummus', name: 'Cucumber Slices with Hummus', cat: 'snacks_fruits', calories: 110, emoji: '🥒', portion: 'Chilled cucumber wheels with 2 tbsp hummus', tag: 'Crisp & Cool' },
+      { id: 'sn_peanut_butter_veggie', name: 'Peanut Butter with Celery & Carrot', cat: 'snacks_fruits', calories: 170, emoji: '🥜', portion: 'Celery sticks with 1.5 tbsp smooth peanut butter', tag: 'Nutty Protein' },
+      { id: 'f_apple', name: 'Pink Lady Apple', cat: 'snacks_fruits', calories: 80, emoji: '🍎', portion: '1 whole crisp juicy apple', tag: 'Lunchbox Classic' },
+      { id: 'f_banana', name: 'Cavendish Banana', cat: 'snacks_fruits', calories: 95, emoji: '🍌', portion: '1 medium ripe banana', tag: 'Quick Fuel' },
+      { id: 'f_orange', name: 'Navel Orange or 2 Mandarins', cat: 'snacks_fruits', calories: 70, emoji: '🍊', portion: '1 sweet orange or 2 peeled mandarins', tag: 'Vitamin C' },
+      { id: 'f_berries', name: 'Fresh Strawberries & Blueberries Bowl', cat: 'snacks_fruits', calories: 50, emoji: '🍓', portion: 'Small punnet bowl of mixed sweet berries', tag: 'Antioxidants' },
+      { id: 'f_watermelon', name: 'Cold Watermelon Wedge', cat: 'snacks_fruits', calories: 70, emoji: '🍉', portion: '1 thick slice of refreshing chilled watermelon', tag: 'Hydrating' },
+      { id: 'f_grapes', name: 'Cup of Seedless Green Grapes', cat: 'snacks_fruits', calories: 75, emoji: '🍇', portion: 'Small bunch / 1 cup sweet grapes', tag: 'Lunch Snack' },
+      { id: 'f_mango', name: 'Sweet Queensland Mango Cheek', cat: 'snacks_fruits', calories: 105, emoji: '🥭', portion: '1 juicy hedgehog cut half mango', tag: 'Tropical King' },
+      { id: 'f_kiwi', name: '2 Fresh Kiwi Fruits', cat: 'snacks_fruits', calories: 85, emoji: '🥝', portion: '2 sweet and tangy kiwi halves', tag: 'Vitamin Boost' },
+      { id: 'sn_tim_tam', name: 'Tim Tam Chocolate Biscuit', cat: 'snacks_fruits', calories: 95, emoji: '🍫', portion: '1 original Arnott’s Tim Tam', tag: 'Arvo Treat' },
+      { id: 'sn_weetbix', name: '2 Weet-Bix with Milk & Honey', cat: 'snacks_fruits', calories: 240, emoji: '🥣', portion: '2 wholegrain biscuits with cold milk', tag: 'Aussie Legend' },
+      { id: 'sn_vegemite_toast', name: 'Vegemite & Butter on Toast', cat: 'snacks_fruits', calories: 190, emoji: '🍞', portion: '2 slices toast with melted butter & Vegemite', tag: 'Happy Little Vegemite' },
+      { id: 'sn_jatz_cheese', name: 'Jatz Crackers & Tasty Cheddar', cat: 'snacks_fruits', calories: 180, emoji: '🧀', portion: '4 Jatz crackers with sliced Aussie cheddar', tag: 'Crunchy Bite' },
+      { id: 'sn_fairy_bread', name: 'Fairy Bread with Butter & Sprinkles', cat: 'snacks_fruits', calories: 110, emoji: '🧁', portion: '1 triangle slice with colorful hundreds & thousands', tag: 'Party Fun' },
+      { id: 'sn_paddle_pop', name: 'Chocolate Paddle Pop', cat: 'snacks_fruits', calories: 85, emoji: '🍦', portion: '1 ice cream stick', tag: 'Cool Down' }
+    ];
+
+    const BULK_WPI_AND_DRINKS_ITEMS = [
+      { id: 'wpi_choc_milk', name: 'Bulk Nutrients WPI Choc Shake (Milk)', cat: 'bulk_wpi', calories: 265, emoji: '🍫', portion: '30g Tasmanian WPI scoop + 250ml milk', tag: '27g Protein Power' },
+      { id: 'wpi_water', name: 'Bulk Nutrients WPI Shake (Water)', cat: 'bulk_wpi', calories: 115, emoji: '💧', portion: '30g Tasmanian WPI scoop + chilled water', tag: 'Pure 26g Protein' },
+      { id: 'wpi_vanilla_almond', name: 'Bulk Nutrients Vanilla WPI (Almond Milk)', cat: 'bulk_wpi', calories: 165, emoji: '🥛', portion: '30g Vanilla WPI + unsweetened almond milk', tag: 'Smooth Recovery' },
+      { id: 'wpi_banana_smoothie', name: 'Bulk Nutrients WPI Banana Smoothie', cat: 'bulk_wpi', calories: 290, emoji: '🍌', portion: '30g WPI + 1 banana + 200ml milk blended', tag: 'Muscle Builder' },
+      { id: 'd_milo_milk', name: 'Milo with Cold or Warm Milk', cat: 'bulk_wpi', calories: 180, emoji: '🥤', portion: '3 heaped tsp Milo + 200ml milk', tag: 'Aussie Energy' },
+      { id: 'd_apple_juice', name: 'Golden Circle Apple Juice Popper', cat: 'bulk_wpi', calories: 110, emoji: '🧃', portion: '1 lunchbox popper box (250ml)', tag: 'Tuckshop Drink' },
+      { id: 'd_cold_milk', name: 'Glass of Cold Full-Cream Milk', cat: 'bulk_wpi', calories: 150, emoji: '🥛', portion: '250ml glass for strong bones & teeth', tag: 'Calcium Power' }
+    ];
+
+    // Combine all standard menu items
+    const DEFAULT_FOODS = [
+      ...BREAKFAST_ITEMS,
+      ...LUNCH_ITEMS,
+      ...DINNER_ITEMS,
+      ...MEATS_AND_SIDES_ITEMS,
+      ...SNACKS_FRUITS_VEGGIES_ITEMS,
+      ...BULK_WPI_AND_DRINKS_ITEMS
+    ];
+
+    const HEALTH_TIPS = [
+      { title: "Bulk Nutrients WPI Muscle Power 💪", body: "Bulk Nutrients WPI (Whey Protein Isolate) from Tasmania gives you 26g of fast-absorbing pure protein to rebuild muscles after footy and swimming!" },
+      { title: "1,800 Calorie Goal 🎯", body: "At 10 years old, 1,800 calories fuels steady growth, high energy for school sports, and healthy concentration during class!" },
+      { title: "Cooked Brekkie Advantage 🍳", body: "Eggs and wholemeal toast deliver choline and zinc to spark your brain before school tests!" },
+      { title: "Smart Slow-Burn Sides 🥔", body: "Potatoes, pasta, and roasted sweet potatoes give slow, reliable energy that fuels you all afternoon without energy crashes!" },
+      { title: "Veggie & Dip Power 🥕", body: "Carrots, celery, and cucumber dipped in hummus or peanut butter offer fiber and vitamins that keep your tummy smiling!" }
+    ];
+
+    let foodList = [...DEFAULT_FOODS];
+    let plate = [];
+    let currentCategory = 'all';
+    let searchQuery = '';
+    let selectedCustomEmoji = '🍳';
+    let tipIndex = 0;
+    const TARGET_CALORIES = 1800;
+
+    function loadSavedData() {
+      try {
+        const savedCustom = localStorage.getItem('kidpower_mega_custom_foods');
+        if (savedCustom) {
+          const parsed = JSON.parse(savedCustom);
+          foodList = [...DEFAULT_FOODS, ...parsed];
+        }
+        const savedPlate = localStorage.getItem('kidpower_mega_plate');
+        if (savedPlate) {
+          plate = JSON.parse(savedPlate);
+        }
+      } catch (err) {
+        console.warn('Local storage load issue', err);
+      }
+      updateCategoryCounts();
+    }
+
+    function savePlateData() {
+      try {
+        localStorage.setItem('kidpower_mega_plate', JSON.stringify(plate));
+      } catch (e) {
+        console.warn('Storage save failed', e);
+      }
+    }
+
+    function updateCategoryCounts() {
+      const counts = {
+        all: foodList.length,
+        breakfast: foodList.filter(f => f.cat === 'breakfast').length,
+        lunch: foodList.filter(f => f.cat === 'lunch').length,
+        dinner: foodList.filter(f => f.cat === 'dinner').length,
+        meats_sides: foodList.filter(f => f.cat === 'meats_sides').length,
+        snacks_fruits: foodList.filter(f => f.cat === 'snacks_fruits').length,
+        bulk_wpi: foodList.filter(f => f.cat === 'bulk_wpi').length
+      };
+
+      for (const [key, val] of Object.entries(counts)) {
+        const el = document.getElementById(`count_${key}`);
+        if (el) el.textContent = val;
+      }
+    }
+
+    function renderFoodShelf() {
+      const grid = document.getElementById('foodsGrid');
+      grid.innerHTML = '';
+
+      const filtered = foodList.filter(item => {
+        const matchesCat = currentCategory === 'all' || item.cat === currentCategory;
+        const matchesQuery = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                             item.portion.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                             (item.tag && item.tag.toLowerCase().includes(searchQuery.toLowerCase()));
+        return matchesCat && matchesQuery;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-12 text-center text-slate-400">
+            <span class="text-4xl block mb-2">🔍</span>
+            <p class="font-bold text-sm">No Aussie tucker found matching "${searchQuery}"</p>
+            <button onclick="openCustomFoodModal()" class="mt-2 text-xs font-bold text-emerald-600 underline">Add your own food to the tuckshop!</button>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(food => {
+        const card = document.createElement('div');
+        card.className = "bg-slate-50 hover:bg-white rounded-2xl p-3 border-2 border-slate-200/80 hover:border-amber-400 transition shadow-sm hover:shadow flex flex-col justify-between bouncy-hover relative";
+        
+        const isBulkNutrients = food.name.includes('Bulk Nutrients');
+        const badgeColor = isBulkNutrients ? 'bg-indigo-100 text-indigo-800' : 'bg-emerald-100 text-emerald-800';
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-3xl p-1 bg-white rounded-xl shadow-xs">${food.emoji}</span>
+              <span class="text-xs font-black px-2 py-0.5 rounded-full ${badgeColor}">
+                ${food.calories} kcal
+              </span>
+            </div>
+            ${food.tag ? `<span class="inline-block mt-1 text-[10px] uppercase tracking-wider font-extrabold text-amber-700 bg-amber-100/90 px-1.5 py-0.5 rounded">${food.tag}</span>` : ''}
+            <h4 class="font-bold text-slate-800 text-sm mt-1 leading-snug">${food.name}</h4>
+            <p class="text-[11px] text-slate-500 mt-0.5 leading-snug line-clamp-2">${food.portion}</p>
+          </div>
+          <button onclick="addToPlate('${food.id}')" 
+                  aria-label="Add ${food.name}"
+                  class="mt-3 w-full py-1.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-fun font-bold text-xs rounded-xl flex items-center justify-center gap-1 shadow-sm transition">
+            <span>+ Add to Plate</span>
+          </button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function filterCategory(category) {
+      currentCategory = category;
+      playPop();
+      document.querySelectorAll('.cat-tab').forEach(tab => {
+        if (tab.getAttribute('data-cat') === category) {
+          tab.classList.remove('bg-slate-100', 'text-slate-600');
+          tab.classList.add('bg-amber-400', 'text-slate-900', 'shadow-sm');
+        } else {
+          tab.classList.remove('bg-amber-400', 'text-slate-900', 'shadow-sm');
+          tab.classList.add('bg-slate-100', 'text-slate-600');
+        }
+      });
+      renderFoodShelf();
+    }
+
+    function searchFoods() {
+      searchQuery = document.getElementById('foodSearchInput').value.trim();
+      renderFoodShelf();
+    }
+
+    function addToPlate(foodId) {
+      const existing = plate.find(p => p.foodId === foodId);
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        plate.push({ foodId, quantity: 1 });
+      }
+      playPop();
+      savePlateData();
+      renderPlate();
+      updateFuelMeter();
+    }
+
+    function updateQuantity(foodId, delta) {
+      const itemIndex = plate.findIndex(p => p.foodId === foodId);
+      if (itemIndex > -1) {
+        plate[itemIndex].quantity += delta;
+        if (plate[itemIndex].quantity <= 0) {
+          plate.splice(itemIndex, 1);
+        }
+        playPop();
+        savePlateData();
+        renderPlate();
+        updateFuelMeter();
+      }
+    }
+
+    function removeItemFromPlate(foodId) {
+      plate = plate.filter(p => p.foodId !== foodId);
+      playPop();
+      savePlateData();
+      renderPlate();
+      updateFuelMeter();
+    }
+
+    function calculateTotalCalories() {
+      return plate.reduce((total, item) => {
+        const food = foodList.find(f => f.id === item.foodId);
+        return total + (food ? food.calories * item.quantity : 0);
+      }, 0);
+    }
+
+    function renderPlate() {
+      const container = document.getElementById('plateItemsList');
+      const emptyState = document.getElementById('emptyPlateState');
+      const summaryCard = document.getElementById('plateSummaryCard');
+      const itemCountSpan = document.getElementById('plateItemCount');
+      const plateTotalBadge = document.getElementById('plateTotalBadge');
+      const proteinScoreText = document.getElementById('proteinScoreText');
+
+      const totalItemsCount = plate.reduce((acc, curr) => acc + curr.quantity, 0);
+      const totalCals = calculateTotalCalories();
+
+      itemCountSpan.textContent = totalItemsCount;
+      plateTotalBadge.textContent = `${totalCals} kcal`;
+
+      if (plate.length === 0) {
+        container.classList.add('hidden');
+        summaryCard.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      container.classList.remove('hidden');
+      summaryCard.classList.remove('hidden');
+
+      // Check for Bulk Nutrients or high-protein selections
+      const hasBulkNutrients = plate.some(item => {
+        const f = foodList.find(food => food.id === item.foodId);
+        return f && (f.id.startsWith('wpi_') || f.name.includes('Bulk Nutrients'));
+      });
+
+      if (hasBulkNutrients) {
+        proteinScoreText.textContent = "⚡ Bulk Nutrients WPI Active (Super Protein)!";
+        proteinScoreText.className = "text-emerald-700 font-black";
+      } else {
+        proteinScoreText.textContent = "Great Everyday Power!";
+        proteinScoreText.className = "text-indigo-900 font-black";
+      }
+
+      container.innerHTML = '';
+      plate.forEach(entry => {
+        const food = foodList.find(f => f.id === entry.foodId);
+        if (!food) return;
+
+        const subtotal = food.calories * entry.quantity;
+        const row = document.createElement('div');
+        row.className = "p-2.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between gap-2.5 hover:bg-amber-50/50 transition";
+        row.innerHTML = `
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="text-2xl p-1 bg-white rounded-xl shadow-xs">${food.emoji}</span>
+            <div class="truncate">
+              <h5 class="text-xs sm:text-sm font-bold text-slate-800 truncate">${food.name}</h5>
+              <div class="text-[11px] text-slate-500 font-semibold">
+                ${food.calories} kcal × ${entry.quantity} = <span class="text-emerald-700 font-bold">${subtotal} kcal</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 shrink-0">
+            <button onclick="updateQuantity('${food.id}', -1)" 
+                    class="w-7 h-7 rounded-xl bg-white border border-slate-300 hover:bg-slate-200 text-slate-700 font-black flex items-center justify-center text-sm transition">
+              -
+            </button>
+            <span class="w-6 text-center font-bold text-sm text-slate-800">${entry.quantity}</span>
+            <button onclick="updateQuantity('${food.id}', 1)" 
+                    class="w-7 h-7 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black flex items-center justify-center text-sm transition shadow-xs">
+              +
+            </button>
+            <button onclick="removeItemFromPlate('${food.id}')" 
+                    title="Remove item"
+                    class="w-7 h-7 ml-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold flex items-center justify-center text-xs transition">
+              🗑️
+            </button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      document.getElementById('plateTotalSummary').textContent = totalCals;
+    }
+
+    let celebratedForGoal = false;
+
+    function updateFuelMeter() {
+      const currentCals = calculateTotalCalories();
+      const currentCalsDisplay = document.getElementById('currentCalsDisplay');
+      const batteryFill = document.getElementById('batteryFill');
+      const percentText = document.getElementById('percentText');
+      const fuelStatusText = document.getElementById('fuelStatusText');
+      const remainingHint = document.getElementById('remainingHint');
+      const cheerBtn = document.getElementById('cheerBtn');
+
+      currentCalsDisplay.textContent = currentCals.toLocaleString();
+
+      const percentage = Math.min(100, Math.round((currentCals / TARGET_CALORIES) * 100));
+      batteryFill.style.width = `${percentage}%`;
+      percentText.textContent = `${percentage}%`;
+
+      const remaining = TARGET_CALORIES - currentCals;
+
+      if (percentage < 35) {
+        batteryFill.style.background = 'linear-gradient(90deg, #F59E0B 0%, #FBBF24 100%)';
+        batteryFill.classList.remove('battery-pulse');
+      } else if (percentage < 90) {
+        batteryFill.style.background = 'linear-gradient(90deg, #38BDF8 0%, #10B981 100%)';
+        batteryFill.classList.remove('battery-pulse');
+      } else {
+        batteryFill.style.background = 'linear-gradient(90deg, #10B981 0%, #059669 100%)';
+        batteryFill.classList.add('battery-pulse');
+      }
+
+      if (currentCals === 0) {
+        fuelStatusText.innerHTML = "G'day mate! Fill up your tank for school, footy training, and playtime! 🏉";
+        remainingHint.innerHTML = "Need 1,800 more points today!";
+        cheerBtn.classList.add('hidden');
+      } else if (currentCals < 500) {
+        fuelStatusText.innerHTML = "Good on ya! Brekkie is in your tummy — you're ready for morning classroom lessons! ⚡";
+        remainingHint.innerHTML = `Need <strong>${remaining}</strong> more fuel points!`;
+        cheerBtn.classList.add('hidden');
+      } else if (currentCals < 1100) {
+        fuelStatusText.innerHTML = "Bonza energy! Halfway charged — primed for lunchtime handball & running games! 🏃‍♂️";
+        remainingHint.innerHTML = `Need <strong>${remaining}</strong> more fuel points!`;
+        cheerBtn.classList.add('hidden');
+      } else if (currentCals < 1750) {
+        fuelStatusText.innerHTML = "Crikey, you're almost at 1,800! Just dinner or an arvo snack to hit the goal! 🌟";
+        remainingHint.innerHTML = `Only <strong>${remaining}</strong> kcal to target!`;
+        cheerBtn.classList.add('hidden');
+      } else if (currentCals >= 1750 && currentCals <= 1950) {
+        fuelStatusText.innerHTML = "🎯 <strong>BEAUTY!</strong> Tank is 100% full with 1,800 Super Points! 🦘";
+        remainingHint.innerHTML = "Full battery unlocked! You're ready to conquer today!";
+        cheerBtn.classList.remove('hidden');
+
+        if (!celebratedForGoal) {
+          fireCelebration();
+          celebratedForGoal = true;
+        }
+      } else {
+        const extra = currentCals - TARGET_CALORIES;
+        fuelStatusText.innerHTML = `⚡ Mega-Charged! You have <strong>${extra} bonus fuel points</strong> for heavy sport training!`;
+        remainingHint.innerHTML = `Tank is extra full (+${extra} kcal)`;
+        cheerBtn.classList.remove('hidden');
+      }
+    }
+
+    function fireCelebration() {
+      playSuccessChime();
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 110,
+          spread: 75,
+          origin: { y: 0.6 }
+        });
+        setTimeout(() => {
+          confetti({
+            particleCount: 70,
+            angle: 60,
+            spread: 60,
+            origin: { x: 0 }
+          });
+          confetti({
+            particleCount: 70,
+            angle: 120,
+            spread: 60,
+            origin: { x: 1 }
+          });
+        }, 200);
+      }
+    }
+
+    function openCustomFoodModal() {
+      playPop();
+      const modal = document.getElementById('customFoodModal');
+      const box = document.getElementById('modalBox');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        box.classList.remove('scale-95', 'opacity-0');
+        box.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function closeCustomFoodModal() {
+      playPop();
+      const modal = document.getElementById('customFoodModal');
+      const box = document.getElementById('modalBox');
+      box.classList.add('scale-95', 'opacity-0');
+      box.classList.remove('scale-100', 'opacity-100');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        document.getElementById('customNameInput').value = '';
+        document.getElementById('customPortionInput').value = '';
+        document.getElementById('customCalInput').value = '';
+      }, 150);
+    }
+
+    function selectEmoji(emoji) {
+      selectedCustomEmoji = emoji;
+      playPop();
+      document.querySelectorAll('.emoji-btn').forEach(btn => {
+        if (btn.textContent.trim() === emoji) {
+          btn.classList.add('border-emerald-600', 'bg-emerald-50');
+          btn.classList.remove('border-slate-200');
+        } else {
+          btn.classList.remove('border-emerald-600', 'bg-emerald-50');
+          btn.classList.add('border-slate-200');
+        }
+      });
+    }
+
+    function saveCustomFood() {
+      const name = document.getElementById('customNameInput').value.trim();
+      const cat = document.getElementById('customCatInput').value;
+      const portion = document.getElementById('customPortionInput').value.trim() || '1 serving';
+      const cals = parseInt(document.getElementById('customCalInput').value, 10);
+
+      if (!name) {
+        highlightError(document.getElementById('customNameInput'));
+        return;
+      }
+      if (isNaN(cals) || cals <= 0) {
+        highlightError(document.getElementById('customCalInput'));
+        return;
+      }
+
+      const newFood = {
+        id: 'custom_' + Date.now(),
+        name: name,
+        cat: cat,
+        calories: cals,
+        emoji: selectedCustomEmoji,
+        portion: portion,
+        tag: 'My Creation'
+      };
+
+      foodList.unshift(newFood);
+
+      try {
+        const savedCustom = JSON.parse(localStorage.getItem('kidpower_mega_custom_foods') || '[]');
+        savedCustom.unshift(newFood);
+        localStorage.setItem('kidpower_mega_custom_foods', JSON.stringify(savedCustom));
+      } catch (e) {
+        console.warn('Storage error', e);
+      }
+
+      updateCategoryCounts();
+      addToPlate(newFood.id);
+      closeCustomFoodModal();
+      renderFoodShelf();
+      playSuccessChime();
+    }
+
+    function highlightError(inputEl) {
+      inputEl.classList.add('border-rose-500', 'ring-2', 'ring-rose-200');
+      inputEl.focus();
+      setTimeout(() => {
+        inputEl.classList.remove('border-rose-500', 'ring-2', 'ring-rose-200');
+      }, 1400);
+    }
+
+    function confirmReset() {
+      playPop();
+      document.getElementById('resetConfirmModal').classList.remove('hidden');
+    }
+
+    function closeResetModal() {
+      playPop();
+      document.getElementById('resetConfirmModal').classList.add('hidden');
+    }
+
+    function executeResetDay() {
+      plate = [];
+      celebratedForGoal = false;
+      savePlateData();
+      renderPlate();
+      updateFuelMeter();
+      closeResetModal();
+      playSuccessChime();
+    }
+
+    function rotateTip() {
+      tipIndex = (tipIndex + 1) % HEALTH_TIPS.length;
+      const titleEl = document.getElementById('tipTitle');
+      const bodyEl = document.getElementById('tipBody');
+      titleEl.textContent = HEALTH_TIPS[tipIndex].title;
+      bodyEl.textContent = HEALTH_TIPS[tipIndex].body;
+    }
+
+    setInterval(rotateTip, 13000);
+
+    window.onload = function () {
+      loadSavedData();
+      renderFoodShelf();
+      renderPlate();
+      updateFuelMeter();
+      selectEmoji('🍳');
+    };
+  </script>
+</body>
+</html>
